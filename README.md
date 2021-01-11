@@ -3,13 +3,35 @@
 Tap a widget for fullscreen display and drag around to pop
 
 ## Getting Started
+1) include the package to your project as dependency:
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/developing-packages/),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+```
+dependencies:
+  	flutter_drag_to_pop: <latest version>
+```
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+2) Use the widget
 
+```dart
+    DragToPop(
+      closeWidget: ClipRRect(
+        borderRadius: BorderRadius.circular(24.0),
+        child: Image.network(
+          'https://th.bing.com/th/id/OIP.eGeQuTMPlWngOAWRCV-LjQHaE8?pid=Api&rs=1',
+        ),
+      ),
+      openWidget: Image.network(
+        'https://th.bing.com/th/id/OIP.eGeQuTMPlWngOAWRCV-LjQHaE8?pid=Api&rs=1',
+      ),
+      openOverlayWidget: Column(
+        children: [
+          AppBar(
+            leading: CloseButton(),
+            elevation: 0.0,
+            backgroundColor: Colors.transparent,
+          )
+        ],
+      ),
+      openBackgroundColor: Colors.grey,
+    );
+```
