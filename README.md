@@ -2,6 +2,8 @@
 
 Tap a widget for fullscreen display and drag around to pop
 
+![Demo](https://media.giphy.com/media/jBPORftNtq77Q2Lalg/giphy.gif)
+
 ## Getting Started
 1) include the package to your project as dependency:
 
