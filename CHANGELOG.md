@@ -9,3 +9,9 @@
 ## 0.0.3
 
 * Add demo gif to README.md
+
+## 0.0.4
+
+* Add more examples
+* Add drag horizontal to pop
+* Add options for overlay opacity

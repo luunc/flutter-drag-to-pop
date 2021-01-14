@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:flutter_drag_to_pop/flutter_drag_to_pop/flutter_drag_to_pop.dart';
 import 'package:flutter_drag_to_pop/widget_with_drag_control/widget_with_drag_control.dart';
 
 class FullScreenModal extends StatefulWidget {
@@ -7,6 +8,11 @@ class FullScreenModal extends StatefulWidget {
   final Widget overlayWidget;
   final Color backgroundColor;
   final String heroKey;
+  final double minOverlayOpacity;
+  final double maxOverlayOpacity;
+  final double horizontalOpacityDragRate;
+  final double verticalOpacityDragRate;
+  final DragToPopDirection dragToPopDirection;
 
   const FullScreenModal({
     Key key,
@@ -14,6 +20,11 @@ class FullScreenModal extends StatefulWidget {
     @required this.heroKey,
     this.backgroundColor = Colors.black,
     this.overlayWidget,
+    this.minOverlayOpacity,
+    this.maxOverlayOpacity,
+    this.horizontalOpacityDragRate,
+    this.verticalOpacityDragRate,
+    this.dragToPopDirection,
   }) : super(key: key);
 
   @override
@@ -58,7 +69,6 @@ class _FullScreenModalState extends State<FullScreenModal>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onPanStart: _onModalDragStart,
       onPanUpdate: _onModalDragUpdate,
       onPanEnd: _onModalDragEnd,
       child: WidgetWithDragControl(
@@ -68,20 +78,30 @@ class _FullScreenModalState extends State<FullScreenModal>
         animation: _animation,
         backgroundColor: widget.backgroundColor,
         overlayWidget: widget.overlayWidget,
+        maxOverlayOpacity: widget.maxOverlayOpacity,
+        minOverlayOpacity: widget.minOverlayOpacity,
+        horizontalOpacityDragRate: widget.horizontalOpacityDragRate,
+        verticalOpacityDragRate: widget.verticalOpacityDragRate,
       ),
     );
   }
 
   void _onModalDragEnd(DragEndDetails dragEndDetails) {
-    if ((_dragOffset.dy).abs() >= MediaQuery.of(context).size.height / 4) {
+    if (_dragOffset == null) return;
+
+    final screenSize = MediaQuery.of(context).size;
+
+    if ((_dragOffset?.dy ?? 0).abs() >= screenSize.height / 3 ||
+        (_dragOffset?.dx ?? 0).abs() >= screenSize.width / 1.8) {
       Navigator.of(context).pop();
       return;
     }
 
     final velocity = dragEndDetails.velocity?.pixelsPerSecond;
     final velocityY = velocity?.dy ?? 0.0;
+    final velocityX = velocity?.dx ?? 0.0;
 
-    if (velocityY.abs() > 150.0) {
+    if (velocityY.abs() > 150.0 || velocityX.abs() > 200.0) {
       Navigator.of(context).pop();
       return;
     }
@@ -98,15 +118,9 @@ class _FullScreenModalState extends State<FullScreenModal>
   }
 
   void _onModalDragUpdate(DragUpdateDetails dragUpdateDetails) {
-    if (_dragOffset == null) return;
-
     final delta = dragUpdateDetails.delta;
-    final newX = _dragOffset.dx + delta.dx;
-    final newY = _dragOffset.dy + delta.dy;
+    final newX = (_dragOffset?.dx ?? 0.0) + delta.dx;
+    final newY = (_dragOffset?.dy ?? 0.0) + delta.dy;
     setState(() => _dragOffset = Offset(newX, newY));
-  }
-
-  void _onModalDragStart(DragStartDetails dragStartDetails) {
-    _dragOffset = Offset(0.0, 0.0);
   }
 }

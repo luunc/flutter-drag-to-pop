@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 class WidgetWithDragControl extends StatelessWidget {
@@ -7,6 +9,10 @@ class WidgetWithDragControl extends StatelessWidget {
   final Animation<Offset> animation;
   final Color backgroundColor;
   final Widget overlayWidget;
+  final double minOverlayOpacity;
+  final double maxOverlayOpacity;
+  final double horizontalOpacityDragRate;
+  final double verticalOpacityDragRate;
 
   const WidgetWithDragControl({
     Key key,
@@ -16,6 +22,10 @@ class WidgetWithDragControl extends StatelessWidget {
     @required this.animation,
     this.backgroundColor = Colors.black,
     this.overlayWidget,
+    this.minOverlayOpacity = 0.0,
+    this.maxOverlayOpacity = 1.0,
+    this.verticalOpacityDragRate = 4,
+    this.horizontalOpacityDragRate = 6,
   }) : super(key: key);
 
   @override
@@ -24,17 +34,24 @@ class WidgetWithDragControl extends StatelessWidget {
       animation: animation,
       builder: (_, Widget child) {
         Offset finalOffset = dragOffset;
-        if (animation.status == AnimationStatus.forward) {
+        if (animation.status == AnimationStatus.forward)
           finalOffset = animation.value;
-        }
 
-        var bgOpacity = 1 - (finalOffset.dy / 500).abs();
-        if (bgOpacity < 0) bgOpacity = 0.0;
+        final bgOpacity = finalOffset.distance == 0.0
+            ? 1.0
+            : math.min(
+                maxOverlayOpacity -
+                    (finalOffset.dy / 100 / verticalOpacityDragRate).abs(),
+                maxOverlayOpacity -
+                    (finalOffset.dx / 100 / horizontalOpacityDragRate).abs(),
+              );
 
         return Stack(
           children: [
             Container(
-              color: backgroundColor.withOpacity(bgOpacity),
+              color: backgroundColor.withOpacity(
+                math.max(bgOpacity, minOverlayOpacity),
+              ),
               child: Transform.translate(
                 offset: finalOffset,
                 child: child,
