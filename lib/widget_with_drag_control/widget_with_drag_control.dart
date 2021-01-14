@@ -3,9 +3,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 class WidgetWithDragControl extends StatelessWidget {
+  final String heroKey;
   final Widget child;
   final Offset dragOffset;
-  final String heroKey;
+  final double scale;
   final Animation<Offset> animation;
   final Color backgroundColor;
   final Widget overlayWidget;
@@ -17,6 +18,7 @@ class WidgetWithDragControl extends StatelessWidget {
   const WidgetWithDragControl({
     Key key,
     @required this.dragOffset,
+    @required this.scale,
     @required this.child,
     @required this.heroKey,
     @required this.animation,
@@ -52,9 +54,12 @@ class WidgetWithDragControl extends StatelessWidget {
               color: backgroundColor.withOpacity(
                 math.max(bgOpacity, minOverlayOpacity),
               ),
-              child: Transform.translate(
-                offset: finalOffset,
-                child: child,
+              child: Transform.scale(
+                scale: scale,
+                child: Transform.translate(
+                  offset: finalOffset,
+                  child: child,
+                ),
               ),
             ),
             if (finalOffset.distance == 0.0 && overlayWidget != null)

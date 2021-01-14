@@ -36,6 +36,8 @@ class _FullScreenModalState extends State<FullScreenModal>
   AnimationController _animationController;
   Animation<Offset> _animation;
   Offset _dragOffset;
+  Offset _previousFocalPoint;
+  double _scale = 1.0;
 
   @override
   void initState() {
@@ -69,11 +71,13 @@ class _FullScreenModalState extends State<FullScreenModal>
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onPanUpdate: _onModalDragUpdate,
-      onPanEnd: _onModalDragEnd,
+      onScaleStart: _onModalDragStart,
+      onScaleUpdate: _onModalDragUpdate,
+      onScaleEnd: _onModalDragEnd,
       child: WidgetWithDragControl(
         child: widget.child,
         dragOffset: _dragOffset ?? Offset(0.0, 0.0),
+        scale: _scale,
         heroKey: widget.heroKey,
         animation: _animation,
         backgroundColor: widget.backgroundColor,
@@ -86,7 +90,10 @@ class _FullScreenModalState extends State<FullScreenModal>
     );
   }
 
-  void _onModalDragEnd(DragEndDetails dragEndDetails) {
+  void _onModalDragStart(ScaleStartDetails dragStartDetails) =>
+      _previousFocalPoint = dragStartDetails.focalPoint;
+
+  void _onModalDragEnd(ScaleEndDetails dragEndDetails) {
     if (_dragOffset == null) return;
 
     final screenSize = MediaQuery.of(context).size;
@@ -114,13 +121,20 @@ class _FullScreenModalState extends State<FullScreenModal>
     });
 
     _animationController.forward();
-    return;
   }
 
-  void _onModalDragUpdate(DragUpdateDetails dragUpdateDetails) {
-    final delta = dragUpdateDetails.delta;
-    final newX = (_dragOffset?.dx ?? 0.0) + delta.dx;
-    final newY = (_dragOffset?.dy ?? 0.0) + delta.dy;
-    setState(() => _dragOffset = Offset(newX, newY));
+  void _onModalDragUpdate(ScaleUpdateDetails dragUpdateDetails) {
+    if (_previousFocalPoint == null) return;
+
+    final currentFocalPoint = dragUpdateDetails.focalPoint;
+    final newX = (_dragOffset?.dx ?? 0.0) +
+        (currentFocalPoint.dx - _previousFocalPoint.dx);
+    final newY = (_dragOffset?.dy ?? 0.0) +
+        (currentFocalPoint.dy - _previousFocalPoint.dy);
+    _previousFocalPoint = currentFocalPoint;
+    setState(() {
+      _dragOffset = Offset(newX, newY);
+      _scale = dragUpdateDetails.scale;
+    });
   }
 }
